@@ -41,13 +41,13 @@ jobs:
       - name: Run tests
         run: ./gradlew test
 
-      - name: Upload AAB to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          appId: ${{ secrets.FIREBASE_APP_ID }}
-          serviceCredentialsFileContent: ${{ secrets.FIREBASE_CREDENTIALS }}
-          groups: testers
-          file: app/build/outputs/bundle/release/app-release.aab
+#      - name: Upload AAB to Firebase App Distribution
+#        uses: wzieba/Firebase-Distribution-Github-Action@v1
+#        with:
+#          appId: ${{ secrets.FIREBASE_APP_ID }}
+#          serviceCredentialsFileContent: ${{ secrets.FIREBASE_CREDENTIALS }}
+#          groups: testers
+#          file: app/build/outputs/bundle/release/app-release.aab
 
 # Fastlane Configuration: fastlane/Fastfile
 #  platform :android do
