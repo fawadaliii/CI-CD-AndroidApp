@@ -1,0 +1,80 @@
+name: Android CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build AAB
+        run: ./gradlew bundleRelease
+
+      - name: Run tests
+        run: ./gradlew test
+
+      - name: Upload AAB to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_CREDENTIALS }}
+          groups: testers
+          file: app/build/outputs/bundle/release/app-release.aab
+
+# Fastlane Configuration: fastlane/Fastfile
+  platform :android do
+  desc "Deploy AAB to Play Store"
+  lane :deploy do
+  upload_to_play_store(
+track: 'internal',
+aab: 'app/build/outputs/bundle/release/app-release.aab',
+json_key: 'play-store-credentials.json',
+package_name: 'com.example.cicdandroidapp'
+  )
+  end
+  end
+
+# Fastlane Setup Instructions
+# 1. Install Fastlane: `gem install fastlane`
+# 2. Create a `play-store-credentials.json` file with your Play Console service account key.
+# 3. Place it in the `fastlane/` directory.
+# 4. Update `package_name` in the Fastfile with your app's package name.
+# 5. Run `fastlane deploy` to upload the AAB to the Play Store's internal track.
+
+# GitHub Actions Setup Instructions
+# 1. Add secrets in GitHub: `FIREBASE_APP_ID` and `FIREBASE_CREDENTIALS` for Firebase App Distribution.
+# 2. Ensure your `app/build.gradle` is configured for release builds (signing config).
+# 3. Push to `main` to trigger the workflow.
+
+# Notes
+# - This setup assumes a standard Android project with Gradle.
+# - For Play Store uploads, ensure your service account has the necessary permissions.
+# - Customize the Firebase distribution groups or Play Store track as needed.
