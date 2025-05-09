@@ -54,7 +54,7 @@ fun Greeting(name: String) {
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 title = {
-                    Text(text = "Hello $name!",)
+                    Text(text = "Hi $name!",)
                 }
             )
         }) { innerPadding ->
